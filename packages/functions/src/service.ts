@@ -274,7 +274,6 @@ async function callAtURL(
   // Encode any special types, such as dates, in the input data.
   data = encode(data);
   const body = { data };
-
   // Add a header for the authToken.
   const headers: { [key: string]: string } = {};
   const context = await functionsInstance.contextProvider.getContext();
@@ -289,7 +288,8 @@ async function callAtURL(
   }
 
   // Default timeout to 70s, but let the options override it.
-  const timeout = options.timeout || 70000;
+  const DEFAULT_TIMEOUT_MS = 70000;
+  const timeout = options.timeout || DEFAULT_TIMEOUT_MS;
 
   const failAfterHandle = failAfter(timeout);
   const response = await Promise.race([
