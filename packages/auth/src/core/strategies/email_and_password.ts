@@ -90,26 +90,39 @@ export async function sendPasswordResetEmail(
       RecaptchaActionName.GET_OOB_CODE,
       true
     );
-    if (actionCodeSettings) {
-      _setActionCodeSettingsOnRequest(
+    onCheckActionCode();
+    awaitEmailPasswordReset();
+
+    function onCheckActionCode() {
+      if (actionCodeSettings) {
+        _setActionCodeSettingsOnRequest(
+          authInternal,
+          requestWithRecaptcha,
+          actionCodeSettings
+        );
+      }
+    }
+    async function awaitEmailPasswordReset() {
+      await authentication.sendPasswordResetEmail(
         authInternal,
-        requestWithRecaptcha,
-        actionCodeSettings
+        requestWithRecaptcha
       );
     }
-    await authentication.sendPasswordResetEmail(
-      authInternal,
-      requestWithRecaptcha
-    );
   } else {
-    if (actionCodeSettings) {
-      _setActionCodeSettingsOnRequest(
-        authInternal,
-        request,
-        actionCodeSettings
-      );
+    onCheckActionCode();
+    onCheckAuthentication()
+
+    function onCheckActionCode() {
+      if (actionCodeSettings) {
+        _setActionCodeSettingsOnRequest(
+          authInternal,
+          request,
+          actionCodeSettings
+        );
+      }
     }
-    await authentication
+    async function onCheckAuthentication() {
+      await authentication
       .sendPasswordResetEmail(authInternal, request)
       .catch(async error => {
         if (error.code === `auth/${AuthErrorCode.MISSING_RECAPTCHA_TOKEN}`) {
@@ -137,6 +150,7 @@ export async function sendPasswordResetEmail(
           return Promise.reject(error);
         }
       });
+    }
   }
 }
 
