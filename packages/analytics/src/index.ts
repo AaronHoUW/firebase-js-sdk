@@ -21,70 +21,11 @@
  * limitations under the License.
  */
 
-import { registerVersion, _registerComponent } from '@firebase/app';
-import { FirebaseAnalyticsInternal } from '@firebase/analytics-interop-types';
-import { factory } from './factory';
-import { ANALYTICS_TYPE } from './constants';
-import {
-  Component,
-  ComponentType,
-  ComponentContainer,
-  InstanceFactoryOptions
-} from '@firebase/component';
-import { ERROR_FACTORY, AnalyticsError } from './errors';
-import { logEvent } from './api';
-import { name, version } from '../package.json';
-import { AnalyticsCallOptions } from './public-types';
-import '@firebase/installations';
+import registerAnalytics from './componentRegistration';
 
 declare global {
   interface Window {
     [key: string]: unknown;
-  }
-}
-
-function registerAnalytics(): void {
-  _registerComponent(
-    new Component(
-      ANALYTICS_TYPE,
-      (container, { options: analyticsOptions }: InstanceFactoryOptions) => {
-        // getImmediate for FirebaseApp will always succeed
-        const app = container.getProvider('app').getImmediate();
-        const installations = container
-          .getProvider('installations-internal')
-          .getImmediate();
-
-        return factory(app, installations, analyticsOptions);
-      },
-      ComponentType.PUBLIC
-    )
-  );
-
-  _registerComponent(
-    new Component('analytics-internal', internalFactory, ComponentType.PRIVATE)
-  );
-
-  registerVersion(name, version);
-  // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-  registerVersion(name, version, '__BUILD_TARGET__');
-
-  function internalFactory(
-    container: ComponentContainer
-  ): FirebaseAnalyticsInternal {
-    try {
-      const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
-      return {
-        logEvent: (
-          eventName: string,
-          eventParams?: { [key: string]: unknown },
-          options?: AnalyticsCallOptions
-        ) => logEvent(analytics, eventName, eventParams, options)
-      };
-    } catch (e) {
-      throw ERROR_FACTORY.create(AnalyticsError.INTEROP_COMPONENT_REG_FAILED, {
-        reason: e as Error
-      });
-    }
   }
 }
 
