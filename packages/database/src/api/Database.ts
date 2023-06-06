@@ -63,8 +63,8 @@ export { EmulatorMockTokenOptions } from '@firebase/util';
  *
  * and make sure the two are consistent.
  */
-const FIREBASE_DATABASE_EMULATOR_HOST_VAR = 'FIREBASE_DATABASE_EMULATOR_HOST';
-
+const FIREBASE_DATABASE_EMULATOR_HOST_ENV_VAR = 'FIREBASE_DATABASE_EMULATOR_HOST';
+const firebaseDatabaseEmulatorHost = process.env[FIREBASE_DATABASE_EMULATOR_HOST_ENV_VAR];
 /**
  * Creates and caches `Repo` instances.
  */
